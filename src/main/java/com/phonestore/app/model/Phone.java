@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,7 +37,7 @@ public class Phone {
     private String description;
 
     @NotNull(message = "Stock quantity is required")
-    @jakarta.validation.constraints.PositiveOrZero(message = "Stock quantity cannot be negative")
+    @PositiveOrZero(message = "Stock quantity cannot be negative")
     @Column(nullable = false)
     private Integer stockQuantity;
 

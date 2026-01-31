@@ -3,6 +3,7 @@ package com.phonestore.app.controller;
 import com.phonestore.app.model.Phone;
 import com.phonestore.app.service.PhoneService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,13 +54,13 @@ public class PhoneController {
     }
 
     @GetMapping("/search/brand")
-    public ResponseEntity<List<Phone>> searchByBrand(@RequestParam @jakarta.validation.constraints.NotBlank(message = "Brand parameter cannot be blank") String brand) {
+    public ResponseEntity<List<Phone>> searchByBrand(@RequestParam @NotBlank(message = "Brand parameter cannot be blank") String brand) {
         List<Phone> phones = phoneService.searchByBrand(brand);
         return ResponseEntity.ok(phones);
     }
 
     @GetMapping("/search/model")
-    public ResponseEntity<List<Phone>> searchByModel(@RequestParam @jakarta.validation.constraints.NotBlank(message = "Model parameter cannot be blank") String model) {
+    public ResponseEntity<List<Phone>> searchByModel(@RequestParam @NotBlank(message = "Model parameter cannot be blank") String model) {
         List<Phone> phones = phoneService.searchByModel(model);
         return ResponseEntity.ok(phones);
     }
