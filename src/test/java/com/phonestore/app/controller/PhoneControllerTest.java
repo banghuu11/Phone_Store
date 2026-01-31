@@ -31,6 +31,7 @@ class PhoneControllerTest {
     private PhoneService phoneService;
 
     private Phone testPhone;
+    private static final String TEST_PHONE_JSON = "{\"brand\":\"Apple\",\"model\":\"iPhone 15 Pro\",\"price\":999.99,\"description\":\"Latest iPhone\",\"stockQuantity\":50,\"imageUrl\":\"https://example.com/iphone.jpg\"}";
 
     @BeforeEach
     void setUp() {
@@ -70,11 +71,9 @@ class PhoneControllerTest {
     void createPhone_ReturnsCreatedPhone() throws Exception {
         when(phoneService.createPhone(any(Phone.class))).thenReturn(testPhone);
 
-        String phoneJson = "{\"brand\":\"Apple\",\"model\":\"iPhone 15 Pro\",\"price\":999.99,\"description\":\"Latest iPhone\",\"stockQuantity\":50,\"imageUrl\":\"https://example.com/iphone.jpg\"}";
-
         mockMvc.perform(post("/api/phones")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(phoneJson))
+                        .content(TEST_PHONE_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.brand", is("Apple")))
                 .andExpect(jsonPath("$.model", is("iPhone 15 Pro")));
@@ -84,11 +83,9 @@ class PhoneControllerTest {
     void updatePhone_ReturnsUpdatedPhone() throws Exception {
         when(phoneService.updatePhone(anyLong(), any(Phone.class))).thenReturn(testPhone);
 
-        String phoneJson = "{\"brand\":\"Apple\",\"model\":\"iPhone 15 Pro\",\"price\":999.99,\"description\":\"Latest iPhone\",\"stockQuantity\":50,\"imageUrl\":\"https://example.com/iphone.jpg\"}";
-
         mockMvc.perform(put("/api/phones/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(phoneJson))
+                        .content(TEST_PHONE_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.brand", is("Apple")));
     }
@@ -97,5 +94,42 @@ class PhoneControllerTest {
     void deletePhone_ReturnsNoContent() throws Exception {
         mockMvc.perform(delete("/api/phones/1"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void searchByBrand_ReturnsPhones() throws Exception {
+        List<Phone> phones = Arrays.asList(testPhone);
+        when(phoneService.searchByBrand("Apple")).thenReturn(phones);
+
+        mockMvc.perform(get("/api/phones/search/brand")
+                        .param("brand", "Apple"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].brand", is("Apple")));
+    }
+
+    @Test
+    void searchByModel_ReturnsPhones() throws Exception {
+        List<Phone> phones = Arrays.asList(testPhone);
+        when(phoneService.searchByModel("iPhone 15 Pro")).thenReturn(phones);
+
+        mockMvc.perform(get("/api/phones/search/model")
+                        .param("model", "iPhone 15 Pro"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].model", is("iPhone 15 Pro")));
+    }
+
+    @Test
+    void searchByPriceRange_ReturnsPhones() throws Exception {
+        List<Phone> phones = Arrays.asList(testPhone);
+        when(phoneService.searchByPriceRange(900.0, 1100.0)).thenReturn(phones);
+
+        mockMvc.perform(get("/api/phones/search/price")
+                        .param("minPrice", "900.0")
+                        .param("maxPrice", "1100.0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].price", is(999.99)));
     }
 }

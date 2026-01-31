@@ -3,6 +3,7 @@ package com.phonestore.app.controller;
 import com.phonestore.app.model.Phone;
 import com.phonestore.app.service.PhoneService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/phones")
-@CrossOrigin(origins = "*")
 public class PhoneController {
 
     private final PhoneService phoneService;
@@ -53,21 +53,24 @@ public class PhoneController {
     }
 
     @GetMapping("/search/brand")
-    public ResponseEntity<List<Phone>> searchByBrand(@RequestParam String brand) {
+    public ResponseEntity<List<Phone>> searchByBrand(@RequestParam @jakarta.validation.constraints.NotBlank(message = "Brand parameter cannot be blank") String brand) {
         List<Phone> phones = phoneService.searchByBrand(brand);
         return ResponseEntity.ok(phones);
     }
 
     @GetMapping("/search/model")
-    public ResponseEntity<List<Phone>> searchByModel(@RequestParam String model) {
+    public ResponseEntity<List<Phone>> searchByModel(@RequestParam @jakarta.validation.constraints.NotBlank(message = "Model parameter cannot be blank") String model) {
         List<Phone> phones = phoneService.searchByModel(model);
         return ResponseEntity.ok(phones);
     }
 
     @GetMapping("/search/price")
     public ResponseEntity<List<Phone>> searchByPriceRange(
-            @RequestParam Double minPrice, 
-            @RequestParam Double maxPrice) {
+            @RequestParam @Positive(message = "Minimum price must be positive") Double minPrice, 
+            @RequestParam @Positive(message = "Maximum price must be positive") Double maxPrice) {
+        if (minPrice > maxPrice) {
+            throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
+        }
         List<Phone> phones = phoneService.searchByPriceRange(minPrice, maxPrice);
         return ResponseEntity.ok(phones);
     }

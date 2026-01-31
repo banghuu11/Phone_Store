@@ -36,6 +36,7 @@ public class Phone {
     private String description;
 
     @NotNull(message = "Stock quantity is required")
+    @jakarta.validation.constraints.PositiveOrZero(message = "Stock quantity cannot be negative")
     @Column(nullable = false)
     private Integer stockQuantity;
 
