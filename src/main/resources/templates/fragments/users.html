@@ -1,0 +1,118 @@
+    <div xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+        <!-- Thêm HTMX script nếu chưa có -->
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        
+        <div class="max-w-7xl mx-auto px-4 py-10">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-3xl font-bold text-blue-700">Quản lý người dùng</h1>
+                <!-- Nút "Thêm người dùng" sử dụng hx-get -->
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow transition-colors"
+                        hx-get="/admin/fragment/users/create" 
+                        hx-target="#section-content" 
+                        hx-swap="innerHTML">
+                    Thêm người dùng
+                </button>
+            </div>
+            <!-- Form tìm kiếm -->
+            <form class="flex items-center gap-2 mb-4"
+                  hx-get="/admin/fragment/users/search"
+                  hx-target="#section-content"
+                  hx-swap="innerHTML">
+                <input type="text" name="keyword"
+                       class="border border-gray-300 rounded px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Tìm theo tên, email, số điện thoại...">
+                <button type="submit"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow">
+                    Tìm kiếm
+                </button>
+            </form>
+
+            <!-- Hiển thị thông báo thành công -->
+            <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <span th:text="${success}"></span>
+            </div>
+
+            <!-- Hiển thị thông báo lỗi -->
+            <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <span th:text="${error}"></span>
+            </div>
+
+            <div class="overflow-x-auto border rounded-lg shadow bg-white">
+                <table class="min-w-full text-sm divide-y divide-gray-200">
+                    <thead class="bg-blue-600 text-white">
+                    <tr>
+                        <th class="px-4 py-3 text-center">ID</th>
+                        <th class="px-4 py-3 text-center">Tên đăng nhập</th>
+                        <th class="px-4 py-3 text-center">Email</th>
+                        <th class="px-4 py-3 text-center">Họ tên</th>
+                        <th class="px-4 py-3 text-center">SĐT</th>
+                        <th class="px-4 py-3 text-center">Địa chỉ</th>
+                        <th class="px-4 py-3 text-center">Avatar</th>
+                        <th class="px-4 py-3 text-center">Quyền</th>
+                        <th class="px-4 py-3 text-center">Ngày tạo</th>
+                        <th class="px-4 py-3 text-center">Trạng thái</th>
+                        <th class="px-4 py-3 text-center">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                    <tr th:each="user : ${users}" class="hover:bg-gray-50">
+                        <td class="px-4 py-2 text-center font-semibold text-blue-700" th:text="${user.userId}">1</td>
+                        <td class="px-4 py-2 text-center" th:text="${user.username}">user</td>
+                        <td class="px-4 py-2 text-center" th:text="${user.email}">email</td>
+                        <td class="px-4 py-2 text-center" th:text="${user.fullName}">Nguyễn Văn A</td>
+                        <td class="px-4 py-2 text-center" th:text="${user.phone}">0911xxx</td>
+                        <td class="px-4 py-2 text-center" th:text="${user.address}">Hà Nội</td>
+                        <td class="px-4 py-2 text-center">
+                            <div class="flex justify-center">
+                                <img th:if="${user.avatar != null and !user.avatar.isEmpty()}" 
+                                    th:src="@{${user.avatar}}" 
+                                    alt="Avatar" 
+                                    class="w-10 h-10 rounded-full border object-cover shadow" />
+                                <span th:if="${user.avatar == null or user.avatar.isEmpty()}" 
+                                    class="italic text-gray-400">Chưa có</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <span th:if="${user.role == 'ADMIN'}" 
+                                class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded font-semibold">Admin</span>
+                            <span th:if="${user.role != 'ADMIN'}" 
+                                class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-semibold">User</span>
+                        </td>
+                        <td class="px-4 py-2 text-center" 
+                            th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}">21/06/2025</td>
+                        <td class="px-4 py-2 text-center">
+                            <span th:if="${user.status == 1}" 
+                                class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-semibold">Hoạt động</span>
+                            <span th:if="${user.status != 1}" 
+                                class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-semibold">Bị khóa</span>
+                        </td>
+                        <td class="px-4 py-2">
+                            <div class="flex justify-center gap-2">
+                                <!-- Nút "Sửa" sử dụng hx-get -->
+                                <button type="button"
+                                        class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-xs shadow transition"
+                                        th:hx-get="@{/admin/fragment/users/edit/{id}(id=${user.userId})}" 
+                                        hx-target="#section-content" 
+                                        hx-swap="innerHTML">
+                                    Sửa
+                                </button>
+                                <!-- Nút "Xóa" sử dụng hx-post -->
+                                <button type="button"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs shadow transition"
+                                        th:hx-post="@{/admin/fragment/users/delete/{id}(id=${user.userId})}" 
+                                        hx-target="#section-content" 
+                                        hx-swap="innerHTML"
+                                        hx-confirm="Bạn có chắc chắn muốn xóa người dùng này không?">
+                                    Xóa
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(users)}">
+                        <td colspan="11" class="text-center text-gray-400 py-8">Không có người dùng nào được tìm thấy.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>

@@ -1,0 +1,54 @@
+<!-- fragments/create_image.html -->
+<div th:fragment="content">
+  <div class="p-6 bg-white rounded shadow">
+    <h2 class="text-2xl font-bold mb-4 text-blue-600" th:text="${isEdit} ? 'Chỉnh sửa ảnh' : 'Thêm ảnh mới'"></h2>
+
+    <!-- Thông báo lỗi nếu có -->
+    <div th:if="${error}" class="mb-4 text-red-600 font-semibold" th:text="${error}"></div>
+
+    <form th:attr="hx-post=${isEdit} ? '/admin/fragment/images/edit/' + ${image.imageId} : '/admin/fragment/images/create'"
+          hx-target="#section-content"
+          hx-swap="innerHTML"
+          th:object="${image}">
+
+      <!-- Chọn sản phẩm -->
+      <div class="mb-4">
+        <label class="block mb-1">Sản phẩm:</label>
+        <select th:field="*{product.productId}" class="w-full border px-3 py-2 rounded" required>
+          <option value="" disabled>-- Chọn sản phẩm --</option>
+          <option th:each="p : ${products}" th:value="${p.productId}" th:text="${p.name}"></option>
+        </select>
+      </div>
+
+      <!-- URL ảnh -->
+      <div class="mb-4">
+        <label class="block mb-1">URL Ảnh:</label>
+        <input type="text" th:field="*{url}" class="w-full border px-3 py-2 rounded" required />
+        <div th:if="${image.url != null and !image.url.isEmpty()}" class="mt-2">
+          <img th:src="@{${image.url}}" alt="Ảnh xem trước" class="w-24 h-24 object-cover border rounded" />
+        </div>
+      </div>
+
+      <!-- Chú thích -->
+      <div class="mb-4">
+        <label class="block mb-1">Chú thích:</label>
+        <input type="text" th:field="*{caption}" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <!-- Các nút -->
+      <div class="flex space-x-2 mt-6">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          💾 <span th:text="${isEdit} ? 'Cập nhật' : 'Tạo mới'"></span>
+        </button>
+
+        <button type="button"
+                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                hx-get="/admin/fragment/images"
+                hx-target="#section-content"
+                hx-swap="innerHTML">
+          🔙 Quay lại
+        </button>
+      </div>
+    </form>
+  </div>
+</div> 

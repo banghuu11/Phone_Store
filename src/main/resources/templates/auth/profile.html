@@ -1,0 +1,75 @@
+<!-- templates/auth/profile.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout/Home_layout.html}" lang="vi">
+<head>
+    <title>Thông tin cá nhân</title>
+</head>
+<body>
+<div layout:fragment="content" class="max-w-5xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold mb-8 text-center">Hồ sơ của tôi</h1>
+
+    <div class="grid md:grid-cols-3 gap-8">
+        <!-- Thông tin tài khoản -->
+        <div class="md:col-span-1 bg-white p-6 rounded-lg shadow">
+            <div class="flex flex-col items-center text-center mb-6">
+                <img th:src="${user.avatar}" alt="Avatar" class="w-24 h-24 rounded-full object-cover mb-3">
+                <p class="text-xl font-semibold" th:text="${user.fullName}">Tên</p>
+                <p class="text-sm text-gray-600" th:text="${user.email}">Email</p>
+            </div>
+
+            <div class="space-y-2 text-sm text-gray-700">
+                <p><span class="font-medium">Username:</span> <span th:text="${user.username}"></span></p>
+                <p><span class="font-medium">Số điện thoại:</span> <span th:text="${user.phone}"></span></p>
+                <p><span class="font-medium">Địa chỉ:</span> <span th:text="${user.address}"></span></p>
+            </div>
+
+            <a href="/profile/edit" class="mt-6 inline-block w-full text-center px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition">
+                Chỉnh sửa thông tin
+            </a>
+        </div>
+
+        <!-- Đơn hàng -->
+        <div class="md:col-span-2">
+            <h2 class="text-2xl font-bold mb-4">Đơn hàng của bạn</h2>
+
+        <div th:if="${#lists.isEmpty(orders)}" class="text-gray-600">Bạn chưa có đơn hàng nào.</div>
+
+        <div th:each="order : ${orders}" class="bg-white p-6 rounded-lg shadow mb-6">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4 text-sm">
+                <div><span class="font-medium">Mã đơn:</span> <span th:text="${order.orderId}"></span></div>
+                <div><span class="font-medium">Ngày đặt:</span> <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></span></div>
+                <div><span class="font-medium">Trạng thái:</span> <span th:text="${order.status}"></span></div>
+            </div>
+
+            <table class="w-full text-xs sm:text-sm border">
+                <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-2 text-left">Sản phẩm</th>
+                    <th class="p-2">SL</th>
+                    <th class="p-2">Giá</th>
+                    <th class="p-2">Tạm tính</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${order.items}">
+                    <td class="p-2" th:text="${item.product.name}"></td>
+                    <td class="p-2 text-center" th:text="${item.quantity}"></td>
+                    <td class="p-2 text-center" th:text="${'₫' + #numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}"></td>
+                    <td class="p-2 text-right" th:text="${'₫' + #numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT')}"></td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="3" class="p-2 text-right font-medium">Tổng:</td>
+                    <td class="p-2 text-right font-bold text-red-600"
+                        th:text="${'₫' + #numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

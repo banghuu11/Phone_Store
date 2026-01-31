@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Custom monochrome theme ===== */
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    @apply focus:outline-none focus:ring-2 focus:ring-gray-700;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-black text-white font-medium px-4 py-2 rounded hover:bg-gray-800 transition;
+  }
+
+  .btn-danger {
+    @apply bg-white text-red-600 border border-red-600 px-4 py-2 rounded hover:bg-red-600 hover:text-white transition;
+  }
+
+  .card {
+    @apply bg-white border border-gray-200 rounded shadow p-4;
+  }
+
+  .table-head {
+    @apply bg-black text-white;
+  }
+}

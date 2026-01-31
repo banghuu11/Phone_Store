@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/Home_layout.html}" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>ShopTech - Danh mục & Sản phẩm</title>
+</head>
+<body class="bg-white text-black font-sans m-0 p-0">
+<div layout:fragment="content">
+    <div th:replace="~{fragmentsHome/banner :: banner}"></div>
+
+    <!-- Wishlist Box -->
+    <section class="py-4 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-xl font-bold mb-4">Sản phẩm yêu thích</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div th:each="product : ${wishlistProducts}" class="p-2">
+                    <div class="bg-white border rounded-md p-4 shadow hover:shadow-xl">
+                        <a th:href="@{'/detail/product/' + ${product.productId}}">
+                            <div class="w-full h-32 bg-gray-100 flex items-center justify-center overflow-hidden rounded-md mb-2">
+                                <img th:src="${product.imageUrl != null && !#strings.isEmpty(product.imageUrl) ? product.imageUrl : '/images/default-product.jpg'}"
+                                     th:alt="${product.name}"
+                                     class="max-w-full max-h-full transition-transform duration-300 hover:scale-105" />
+                            </div>
+                            <!-- Product Name with fixed 3 lines -->
+                            <div class="text-sm font-medium text-center line-clamp-3" th:text="${product.name}">
+                                Product Name
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sản phẩm -->
+    <!-- Sản phẩm -->
+    <section class="py bg-white">
+        <div class="container mx-auto px-4">
+            <div th:each="entry : ${showcase}" class="mb-14">
+                <!-- Category Header -->
+                <div class="flex justify-between items-center mb-4 border-b-2 border-black pb-2">
+                    <h2 class="text-2xl uppercase text-black font-bold" th:text="${entry.key.name}">Category Name</h2>
+                    <a th:href="@{'/category/parent/' + ${entry.key.categoryId}}" class="text-sm text-black hover:underline">Xem tất cả</a>
+                </div>
+                <!-- Child Categories -->
+                <div th:if="${entry.key.children != null}" class="mb-4">
+                    <div class="flex gap-2">
+                        <a th:each="child : ${entry.key.children}"
+                           th:href="@{'/category/' + ${child.categoryId}}"
+                           th:text="${child.name}"
+                           class="text-xs px-2 py-1 border border-black rounded-full bg-white text-black transition-colors hover:bg-black hover:text-white">
+                        </a>
+                    </div>
+                </div>
+                <!-- Product Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6">
+                    <div th:each="product : ${entry.value}" class="p-2" th:attr="id=${'productWrapper_' + product.productId}">
+                        <article class="bg-white border-2 rounded-xl shadow-none hover:shadow-xl transition-transform hover:-translate-y-1 duration-300 relative group flex flex-col"
+                                 th:attr="id=${'productCard_' + product.productId}" style="width: 250px; height: 400px;">
+                            <!-- Wishlist Button -->
+                            <button type="button"
+                                    class="absolute top-3 right-3 bg-white bg-opacity-100 rounded-full p-2  shadow-none transition-colors duration-300 z-10 hover:text-white"
+                                    th:title="${wishlistProductIds.contains(product.productId) ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}"
+                                    th:onclick="'addToWishlist(' + ${product.productId} + ', this)'">
+                                <i class="fas fa-heart transition-colors duration-300 text-lg"
+                                   th:classappend="${wishlistProductIds.contains(product.productId)} ? 'text-red-500 ' : ' text-gray-400'"></i>
+                            </button>
+                            <!-- Product Details Container -->
+                            <a th:href="@{'/detail/product/' + ${product.productId}}" class="block h-full">
+                                <!-- Product Image -->
+                                <div class="w-full h-40 flex items-center justify-center overflow-hidden rounded-t-xl mb-2 group-hover:scale-105 transition-transform duration-300">
+                                    <img th:src="${product.imageUrl != null && !#strings.isEmpty(product.imageUrl) ? product.imageUrl : '/images/default-product.jpg'}"
+                                         th:alt="${product.name}" class="max-w-full max-h-full object-contain" />
+                                </div>
+                                <span th:if="${product.discount > 0}"
+                                      class="text-xs bg-red-800 text-white px-2 py-0.5 rounded font-semibold shadow-sm absolute top-3 left-3">
+                                -<span th:text="${#numbers.formatDecimal(product.discount, 0, 'COMMA', 0, 'POINT')}">0</span>%
+                            </span>
+                                <!-- Product Name -->
+                                <h2 class="text-base font-bold text-center my-1 line-clamp-2 px-2 text-black" th:text="${product.name}">
+                                    Product Name
+                                </h2>
+                                <!-- Giá và Giảm giá -->
+                                <div class="flex items-center justify-center gap-2 mb-2">
+                                <span th:if="${product.discount > 0}"
+                                      class="text-sm text-gray-400 line-through"
+                                      th:text="${'₫' + #numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')}">
+                                    ₫0
+                                </span>
+                                    <span class="text-lg font-bold text-black"
+                                          th:text="${'₫' + #numbers.formatDecimal(product.price * (1 - product.discount / 100), 0, 'COMMA', 0, 'POINT')}">
+                                    ₫0
+                                </span>
+                                </div>
+                                <!-- Description Container -->
+                                <div id="descContainer_[[${product.productId}]]" class="overflow-hidden h-16 transition-all duration-300 px-2">
+                                    <p id="desc__[[${product.productId}]]" class="text-sm text-gray-600 line-clamp-3" th:text="${product.description}">
+                                    </p>
+                                </div>
+                                <button type="button"
+                                        class="w-full text-xs text-black bg-white py-1 mt-0 mb-2 rounded-md border  transition-colors duration-300 hover:bg-black hover:text-white"
+                                        th:attr="onclick='toggleDesc(' + ${product.productId} + ')'">
+                                    Xem thêm mô tả
+                                </button>
+                            </a>
+                            <!-- Action Buttons at the bottom -->
+                            <div class="absolute bottom-3 left-3 right-3 flex gap-2">
+                                <button type="button" th:onclick="'addToCart(' + ${product.productId} + ')'"
+                                        class="flex-1 h-9 flex items-center justify-center rounded-md font-bold bg-black text-white transition-colors duration-300 hover:bg-white hover:text-black hover:border-black border border-black shadow-none">
+                                    🛒 Thêm
+                                </button>
+                                <a href="cart" method="post" class="flex-1">
+                                    <input type="hidden" name="productId" th:value="${product.productId}" />
+                                    <button type="button" th:onclick="'addToCart(' + ${product.productId} + ')'"
+                                            class="w-full h-9 flex items-center justify-center rounded-md font-bold bg-white text-black border border-black transition-colors duration-300 hover:bg-black hover:text-white shadow-none">
+                                        Mua ngay
+                                    </button>
+                                </a>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        // Toggle description display and wrapper shadow effect when user clicks "Xem thêm"
+        function toggleDesc(id) {
+            var desc = document.getElementById('desc__' + id);
+            if (!desc) return;
+            var btn = desc.nextElementSibling;
+            var wrapper = document.getElementById('productWrapper_' + id);
+            if (desc.classList.contains('line-clamp-3')) {
+                desc.classList.remove('line-clamp-3');
+                wrapper.classList.add('shadow-xl');
+                btn.textContent = 'Ẩn bớt';
+            } else {
+                desc.classList.add('line-clamp-3');
+                wrapper.classList.remove('shadow-xl');
+                btn.textContent = 'Xem thêm';
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

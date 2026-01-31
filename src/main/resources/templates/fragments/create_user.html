@@ -1,0 +1,149 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+    <!-- Thêm HTMX script nếu chưa có -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <div class="w-full max-w-lg mx-auto px-4">
+        <h2 class="text-2xl font-bold text-gray-800 mb-8 text-center"
+            th:text="${user.userId != null ? 'Chỉnh sửa người dùng' : 'Thêm người dùng'}">Thêm người dùng</h2>
+
+        <!-- Hiển thị thông báo lỗi -->
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Form sử dụng hx-post để submit AJAX -->
+        <form id="userForm"
+              th:object="${user}"
+              method="post"
+              th:hx-post="${user.userId != null ? '/admin/fragment/users/edit/' + user.userId : '/admin/fragment/users/create'}"
+              hx-target="#section-content"
+              hx-swap="innerHTML"
+              class="bg-white p-6 rounded shadow">
+
+            <!-- Hidden field để lưu userId khi edit -->
+            <input type="hidden" th:field="*{userId}" th:if="${user.userId != null}"/>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Tên đăng nhập *</label>
+                <input type="text"
+                       th:field="*{username}"
+                       class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                       required
+                       placeholder="Tên đăng nhập"/>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Email *</label>
+                <input type="email"
+                       th:field="*{email}"
+                       class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                       required
+                       placeholder="Email hợp lệ"/>
+            </div>
+
+            <!-- Trường password chỉ hiển thị khi tạo mới -->
+            <div class="mb-4" th:if="${user.userId == null}">
+                <label class="block text-gray-700 font-medium mb-1">Mật khẩu *</label>
+                <input type="password"
+                       th:field="*{password}"
+                       class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                       required
+                       placeholder="Mật khẩu"/>
+            </div>
+
+            <!-- Thông báo về password khi edit -->
+            <div class="mb-4" th:if="${user.userId != null}">
+                <p class="text-sm text-gray-600 italic bg-yellow-50 border border-yellow-200 p-2 rounded">
+                    💡 Để trống mật khẩu nếu không muốn thay đổi
+                </p>
+                <label class="block text-gray-700 font-medium mb-1 mt-2">Mật khẩu mới (tùy chọn)</label>
+                <input type="password"
+                       name="newPassword"
+                       class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                       placeholder="Nhập mật khẩu mới nếu muốn thay đổi"/>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Họ tên</label>
+                <input type="text"
+                       th:field="*{fullName}"
+                       class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                       placeholder="Họ và tên"/>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Số điện thoại</label>
+                <input type="text"
+                       th:field="*{phone}"
+                       class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                       placeholder="Số điện thoại"/>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Địa chỉ</label>
+                <textarea th:field="*{address}"
+                          class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                          rows="2"
+                          placeholder="Địa chỉ"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Avatar (URL)</label>
+                <input type="text"
+                       th:field="*{avatar}"
+                       class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                       placeholder="Đường dẫn ảnh đại diện"/>
+                <!-- Hiển thị preview avatar nếu có -->
+                <div th:if="${user.avatar != null and !user.avatar.isEmpty()}" class="mt-2">
+                    <img th:src="@{${user.avatar}}" alt="Avatar Preview" class="w-16 h-16 rounded-full border object-cover"/>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Quyền</label>
+                <select th:field="*{role}"
+                        class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500">
+                    <option value="USER">User</option>
+                    <option value="ADMIN">Admin</option>
+                </select>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-1">Trạng thái</label>
+                <select th:field="*{status}"
+                        class="border rounded px-3 py-2 w-full focus:outline-none focus:border-blue-500">
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Khóa</option>
+                </select>
+            </div>
+
+            <div class="flex justify-between gap-4">
+                <!-- Nút Lưu: type="submit" sẽ kích hoạt hx-post trên form -->
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded transition-colors">
+                    <span th:text="${user.userId != null ? 'Cập nhật' : 'Tạo mới'}">Lưu</span>
+                </button>
+
+                <!-- Nút Quay lại: Sử dụng hx-get để tải lại danh sách người dùng -->
+                <button type="button"
+                        hx-get="/admin/fragment/users" 
+                        hx-target="#section-content" 
+                        hx-swap="innerHTML"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded transition-colors">
+                    Quay lại
+                </button>
+
+                <!-- Nút XÓA chỉ hiện khi đang ở chế độ SỬA -->
+                <button type="button"
+                        th:if="${user.userId != null}"
+                        th:hx-post="@{/admin/fragment/users/delete/{id}(id=${user.userId})}" 
+                        hx-target="#section-content" 
+                        hx-swap="innerHTML"
+                        hx-confirm="Bạn có chắc chắn muốn xóa người dùng này không?"
+                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded transition-colors">
+                    Xóa
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

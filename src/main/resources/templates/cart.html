@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng - ShopTech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div th:replace="fragmentsHome/header :: header"></div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- Breadcrumb -->
+            <nav class="mb-8">
+                <ol class="flex items-center space-x-2 text-sm text-gray-600">
+                    <li><a href="/" class="hover:text-black">Trang chủ</a></li>
+                    <li><span class="mx-2">/</span></li>
+                    <li class="text-black font-medium">Giỏ hàng</li>
+                </ol>
+            </nav>
+
+            <!-- Page Title -->
+            <h1 class="text-3xl font-bold text-gray-900 mb-8">Giỏ hàng</h1>
+
+            <!-- Cart Content -->
+            <div th:if="${#lists.isEmpty(cartItems)}" class="text-center py-16">
+                <div class="text-6xl mb-4">🛒</div>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Giỏ hàng trống</h2>
+                <p class="text-gray-500 mb-8">Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+                <a href="/" class="inline-block bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition">
+                    Tiếp tục mua sắm
+                </a>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(cartItems)}" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Cart Items -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Cart Items List -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="p-6 border-b">
+                            <h2 class="text-xl font-semibold">Sản phẩm trong giỏ hàng</h2>
+                        </div>
+
+                        <div class="divide-y">
+                            <div th:each="item : ${cartItems}" class="p-6 flex items-center space-x-4">
+                                <!-- Product Image -->
+                                <div class="flex-shrink-0">
+                                    <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : '/images/default-product.jpg'}"
+                                         th:alt="${item.product.name}"
+                                         class="w-20 h-20 object-cover rounded-lg">
+                                </div>
+
+                                <!-- Product Info -->
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-lg font-medium text-gray-900" th:text="${item.product.name}"></h3>
+                                    <p class="text-sm text-gray-500 mt-1" th:text="${item.product.description}"></p>
+                                    <p class="text-lg font-semibold text-black mt-2" th:text="${'₫' + #numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')}"></p>
+                                </div>
+
+                                <!-- Quantity Controls -->
+                                <div class="flex items-center space-x-2">
+                                    <button th:onclick="'if(' + ${item.quantity} + ' > 1) updateQuantity(' + ${item.product.productId} + ', ' + (${item.quantity} - 1) + ');'"
+                                            class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50">
+                                        -
+                                    </button>
+                                    <span class="w-12 text-center font-medium" th:text="${item.quantity}"></span>
+                                    <button th:onclick="'updateQuantity(' + ${item.product.productId} + ', ' + ${item.quantity + 1} + ')'"
+                                            class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50">
+                                        +
+                                    </button>
+                                </div>
+
+                                <!-- Subtotal -->
+                                <div class="text-right">
+                                    <p class="text-lg font-semibold text-black" th:text="${'₫' + #numbers.formatDecimal(item.subtotal, 1, 'COMMA', 0, 'POINT')}"></p>
+                                </div>
+
+                                <!-- Remove Button -->
+                                <button th:onclick="'removeFromCart(' + ${item.product.productId} + ')'"
+                                        class="text-red-500 hover:text-red-700 p-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Clear Cart Button -->
+                        <div class="p-6 border-t">
+                            <button onclick="clearCart()"
+                                    class="text-red-500 hover:text-red-700 font-medium">
+                                Xóa tất cả sản phẩm
+                            </button>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/order/checkout}" method="post">
+                        <!-- Shipping Address -->
+                        <div class="bg-white rounded-lg shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold mb-4">Địa chỉ giao hàng</h3>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
+                                        <input type="text" name="fullName" required
+                                               class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-black">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                                        <input type="tel" name="phone" required
+                                               class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-black">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ chi tiết</label>
+                                    <input type="text" name="addressDetail" required
+                                           class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-black"
+                                           placeholder="Số nhà, tên đường...">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành phố</label>
+                                        <select id="province" name="province"
+                                                class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-black" required>
+                                            <option value="">-- Chọn tỉnh/thành phố --</option>
+                                            <option value="HN">Hà Nội</option>
+                                            <option value="HCM">TP. Hồ Chí Minh</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện</label>
+                                        <select id="district" name="district"
+                                                class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-black" required>
+                                            <option value="">-- Chọn quận/huyện --</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Phường/Xã</label>
+                                        <select id="ward" name="ward"
+                                                class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-black" required>
+                                            <option value="">-- Chọn phường/xã --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                                    <textarea name="note" rows="3"
+                                              class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-black"
+                                              placeholder="Ghi chú về đơn hàng..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="bg-white rounded-lg shadow-sm border p-6 mt-6">
+                            <h3 class="text-lg font-semibold mb-4">Phương thức thanh toán</h3>
+                            <div class="space-y-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="paymentMethod" value="COD" checked class="text-black focus:ring-black">
+                                    <span>Thanh toán khi nhận hàng (COD)</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="paymentMethod" value="BANK" class="text-black focus:ring-black">
+                                    <span>Chuyển khoản ngân hàng</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="paymentMethod" value="MOMO" class="text-black focus:ring-black">
+                                    <span>Ví MoMo</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="paymentMethod" value="VNPAY" class="text-black focus:ring-black">
+                                    <span>VNPay</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Checkout Button -->
+                        <div class="mt-6">
+                            <button type="submit"
+                                    class="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-800 transition">
+                                Tiến hành thanh toán
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Payment Method -->
+
+                </div>
+
+                <!-- Order Summary -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-sm border p-6 sticky top-4">
+                        <h2 class="text-xl font-semibold mb-4">Tóm tắt đơn hàng</h2>
+
+                        <!-- Voucher/Discount Code -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mã giảm giá</label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="voucherCode" placeholder="Nhập mã giảm giá"
+                                       class="flex-1 border border-gray-300 px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                                <button onclick="applyVoucher()"
+                                        class="bg-gray-800 text-white px-4 py-2 rounded text-sm hover:bg-black transition">
+                                    Áp dụng
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary Details -->
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Tạm tính:</span>
+                                <span th:text="${'₫' + #numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')}"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Giảm giá:</span>
+                                <span class="text-green-600" id="discountAmount">-₫0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Phí vận chuyển:</span>
+                                <span id="shippingFee">Miễn phí</span>
+                            </div>
+                            <div class="border-t pt-3">
+                                <div class="flex justify-between font-semibold text-lg">
+                                    <span>Tổng cộng:</span>
+                                    <span th:text="${'₫' + #numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')}" id="finalTotal"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checkout Button -->
+                        <button onclick="checkout()"
+                                class="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-800 transition mb-4">
+                            Tiến hành thanh toán
+                        </button>
+
+                        <!-- Continue Shopping -->
+                        <div class="text-center">
+                            <a href="/" class="text-gray-600 hover:text-black text-sm">
+                                ← Tiếp tục mua sắm
+                            </a>
+                        </div>
+
+                        <!-- Security Info -->
+                        <div class="mt-6 pt-6 border-t">
+                            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                <span>Thanh toán an toàn</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="fragmentsHome/footer :: footer"></div>
+
+    <script>
+        function updateQuantity(productId, quantity) {
+            $.post('/cart/update/' + productId, {quantity: quantity})
+                .done(function(response) {
+                    if (response === 'success') {
+                        location.reload();
+                    }
+                });
+        }
+
+        function removeFromCart(productId) {
+            if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+                $.post('/cart/remove/' + productId)
+                    .done(function(response) {
+                        if (response === 'success') {
+                            location.reload();
+                        }
+                    });
+            }
+        }
+
+        function clearCart() {
+            if (confirm('Bạn có chắc muốn xóa tất cả sản phẩm khỏi giỏ hàng?')) {
+                $.post('/cart/clear')
+                    .done(function(response) {
+                        if (response === 'success') {
+                            location.reload();
+                        }
+                    });
+            }
+        }
+
+        function applyVoucher() {
+            const code = document.getElementById('voucherCode').value.trim();
+            if (code === '') {
+                alert('Vui lòng nhập mã giảm giá');
+                return;
+            }
+
+            $.post('/cart/apply-coupon', {code: code})
+                .done(function(res) {
+                    if (res.success) {
+                        document.getElementById('discountAmount').textContent = '-₫' + formatCurrency(res.discountAmount);
+                        document.getElementById('finalTotal').textContent = '₫' + formatCurrency(res.finalTotal);
+                        alert(res.message);
+                    } else {
+                        alert(res.message);
+                    }
+                })
+                .fail(function() {
+                    alert('Có lỗi xảy ra khi áp dụng mã giảm giá');
+                });
+        }
+
+        function formatCurrency(value) {
+            return Number(value).toLocaleString('vi-VN');
+        }
+
+        function checkout() {
+            // Validate form
+            const name = document.querySelector('input[type="text"]').value;
+            const phone = document.querySelector('input[type="tel"]').value;
+            const address = document.querySelectorAll('input[type="text"]')[2].value;
+
+            if (!name || !phone || !address) {
+                alert('Vui lòng điền đầy đủ thông tin giao hàng');
+                return;
+            }
+
+            // Simulate checkout process
+            alert('Đang chuyển đến trang thanh toán...');
+            // Redirect to checkout page or payment gateway
+        }
+
+
+
+
+const data = {
+  HN: {
+    "Ba Đình": ["Phúc Xá", "Trúc Bạch", "Vĩnh Phúc"],
+    "Hoàn Kiếm": ["Hàng Bạc", "Lý Thái Tổ", "Tràng Tiền"]
+  },
+  HCM: {
+    "Quận 1": ["Bến Nghé", "Bến Thành", "Nguyễn Thái Bình"],
+    "Quận 3": ["Phường 1", "Phường 2", "Phường 3"]
+  }
+};
+
+const provinceSelect = document.getElementById("province");
+const districtSelect = document.getElementById("district");
+const wardSelect = document.getElementById("ward");
+
+provinceSelect.addEventListener("change", function () {
+  const province = this.value;
+  districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+  wardSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
+
+  if (province && data[province]) {
+    Object.keys(data[province]).forEach(district => {
+      const option = document.createElement("option");
+      option.value = district;
+      option.textContent = district;
+      districtSelect.appendChild(option);
+    });
+  }
+});
+
+districtSelect.addEventListener("change", function () {
+  const province = provinceSelect.value;
+  const district = this.value;
+  wardSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
+
+  if (province && district && data[province][district]) {
+    data[province][district].forEach(ward => {
+      const option = document.createElement("option");
+      option.value = ward;
+      option.textContent = ward;
+      wardSelect.appendChild(option);
+    });
+  }
+});
+</script>
+</body>
+</html>

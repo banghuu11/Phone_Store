@@ -1,0 +1,82 @@
+    <!DOCTYPE html>
+    <html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Đăng ký</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+        <h2 class="text-2xl font-bold text-center mb-6">Tạo tài khoản</h2>
+
+        <form th:action="@{/Home/register}" th:object="${user}" method="post" class="space-y-4" onsubmit="return validatePassword()">
+
+            <div>
+                <label for="username" class="block text-sm font-medium">Tên đăng nhập</label>
+                <input type="text" th:field="*{username}" id="username" required
+                       class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none">
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium">Email</label>
+                <input type="email" th:field="*{email}" id="email" required
+                       class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium">Mật khẩu</label>
+                <div class="relative">
+                    <input type="password" th:field="*{password}" id="password" required
+                           class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none">
+                    <span class="absolute right-3 top-2.5 cursor-pointer" onclick="togglePassword('password')">👁️</span>
+                </div>
+            </div>
+
+            <div>
+                <label for="confirmPassword" class="block text-sm font-medium">Nhập lại mật khẩu</label>
+                <div class="relative">
+                    <input type="password" id="confirmPassword" required
+                           class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-black focus:outline-none">
+                    <span class="absolute right-3 top-2.5 cursor-pointer" onclick="togglePassword('confirmPassword')">👁️</span>
+                </div>
+                <p id="passwordMismatch" class="text-red-600 text-xs mt-1 hidden">Mật khẩu không khớp.</p>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition">
+                Đăng ký
+            </button>
+        </form>
+
+        <!-- Thông báo lỗi nếu có -->
+        <p th:if="${error}" th:text="${error}" class="mt-4 text-red-600 text-sm text-center"></p>
+
+        <p class="text-sm text-center mt-4">
+            Đã có tài khoản?
+            <a href="/Home/login" class="text-blue-600 hover:underline">Đăng nhập</a>
+        </p>
+    </div>
+
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function validatePassword() {
+            const pw = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            const warning = document.getElementById('passwordMismatch');
+
+            if (pw !== confirm) {
+                warning.classList.remove('hidden');
+                return false;
+            }
+            warning.classList.add('hidden');
+            return true;
+        }
+    </script>
+
+    </body>
+    </html>

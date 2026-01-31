@@ -1,0 +1,145 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+    <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-10">
+        <!-- Tiêu đề -->
+        <h2 class="text-3xl font-bold text-center text-indigo-700 mb-6"
+            th:text="${coupon.couponId != null ? '✏️ Chỉnh sửa Phiếu giảm giá' : '➕ Thêm Phiếu giảm giá'}">
+            Thêm Phiếu giảm giá
+        </h2>
+
+        <!-- Thông báo -->
+        <div th:if="${error}" class="bg-red-100 text-red-700 px-4 py-3 rounded mb-4" th:text="${error}"></div>
+        <div th:if="${success}" class="bg-green-100 text-green-700 px-4 py-3 rounded mb-4" th:text="${success}"></div>
+
+        <!-- Form -->
+        <form th:object="${coupon}"
+              method="post"
+              th:hx-post="${coupon.couponId != null ? '/admin/coupons/edit/' + coupon.couponId : '/admin/coupons/create'}"
+              hx-target="#section-content"
+              hx-swap="innerHTML"
+              class="space-y-6">
+
+            <!-- Mã giảm giá -->
+            <div>
+                <label class="block font-medium mb-1">Mã giảm giá <span class="text-red-500">*</span></label>
+                <input type="text" th:field="*{code}" required
+                       placeholder="VD: GIAM50"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500">
+            </div>
+
+            <!-- Mô tả -->
+            <div>
+                <label class="block font-medium mb-1">Mô tả</label>
+                <textarea th:field="*{description}" rows="2"
+                          placeholder="Thông tin mô tả"
+                          class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500"></textarea>
+            </div>
+
+            <!-- Phần trăm giảm -->
+            <div>
+                <label class="block font-medium mb-1">% Giảm giá <span class="text-red-500">*</span></label>
+                <input type="number" th:field="*{discountPercent}" min="1" max="100" required
+                       placeholder="VD: 20 (%)"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500">
+            </div>
+
+            <!-- Số tiền giảm tối đa -->
+            <div>
+                <label class="block font-medium mb-1">Giảm tối đa (VNĐ)</label>
+                <input type="number" th:field="*{maxDiscount}" min="0"
+                       placeholder="VD: 1000000 (1 triệu)"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500">
+            </div>
+
+            <!-- Giá trị đơn hàng tối thiểu -->
+            <div>
+                <label class="block font-medium mb-1">Giá trị đơn hàng tối thiểu (VNĐ)</label>
+                <input type="number" th:field="*{minOrderValue}" min="0"
+                       placeholder="VD: 500000 (nửa triệu)"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500">
+            </div>
+
+            <!-- Giới hạn số lần sử dụng -->
+            <div>
+                <label class="block font-medium mb-1">Giới hạn sử dụng</label>
+                <input type="number" th:field="*{usageLimit}" min="0"
+                       placeholder="VD: 100 (0 = không giới hạn)"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500">
+            </div>
+
+            <!-- Ngày bắt đầu -->
+            <div>
+                <label class="block font-medium mb-1">Ngày bắt đầu <span class="text-red-500">*</span></label>
+                <input type="date" th:field="*{startDate}" required
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500">
+            </div>
+
+            <!-- Ngày kết thúc -->
+            <div>
+                <label class="block font-medium mb-1">Ngày kết thúc <span class="text-red-500">*</span></label>
+                <input type="date" th:field="*{endDate}" required
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500">
+            </div>
+
+            <!-- Trạng thái -->
+            <div>
+                <label class="block font-medium mb-1">Trạng thái</label>
+                <select th:field="*{status}"
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500">
+                    <option th:value="true">Hiệu lực</option>
+                    <option th:value="false">Tạm ngưng</option>
+                </select>
+            </div>
+
+            <!-- Nút -->
+            <div class="flex justify-between pt-4">
+                <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition">
+                    <span th:text="${coupon.couponId != null ? 'Cập nhật' : 'Tạo mới'}">Lưu</span>
+                </button>
+                <button type="button"
+                        hx-get="/admin/coupons"
+                        hx-target="#section-content"
+                        hx-swap="innerHTML"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition">
+                    Quay lại
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    // Hàm định dạng số có dấu phẩy (1,000,000)
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, ''); // loại bỏ ký tự không phải số
+        if (value) {
+            input.value = parseInt(value).toLocaleString('vi-VN');
+        } else {
+            input.value = '';
+        }
+    }
+
+    // Hàm bỏ định dạng khi submit để tránh lỗi backend
+    function unformatCurrency(input) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    // Áp dụng cho các trường tiền tệ
+    document.addEventListener('DOMContentLoaded', function () {
+        const currencyFields = document.querySelectorAll('input[th\\:field="*{maxDiscount}"], input[th\\:field="*{minOrderValue}"]');
+
+        currencyFields.forEach(function (input) {
+            // Format khi nhập
+            input.addEventListener('input', function () {
+                formatCurrency(input);
+            });
+
+            // Bỏ format khi submit
+            input.form.addEventListener('submit', function () {
+                unformatCurrency(input);
+            });
+
+            // Format ban đầu nếu có sẵn giá trị
+            formatCurrency(input);
+        });
+    });
+</script>

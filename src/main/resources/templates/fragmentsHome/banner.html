@@ -1,0 +1,87 @@
+<!-- fragmentsHome/banner.html -->
+<div th:fragment="banner">
+    <div id="default-carousel" class="relative w-full mt-6" data-carousel="slide">
+        <!-- Carousel wrapper -->
+        <div class="relative aspect-[30/9] overflow-hidden rounded-xl shadow-lg">
+
+            <!-- Slide 1 (Video) -->
+            <div class="carousel-item absolute inset-0 duration-700 ease-in-out opacity-100" data-carousel-item="active">
+                <video autoplay loop muted playsinline
+                       class="absolute w-full h-full object-cover z-0">
+                    <source th:src="@{/videos/bannerVideo2.mp4}" type="video/mp4">
+                    Trình duyệt của bạn không hỗ trợ video.
+                </video>
+                <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent z-10"></div>
+
+                <div class="absolute inset-0 flex items-center justify-center z-20">
+                    <div class="text-center text-white px-4 max-w-4xl">
+                        <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 drop-shadow-lg">
+                            HỮU BẰNG ĐẸP TRAI CODE GIỎI
+
+                        </h1>
+                        <p class="text-lg md:text-xl lg:text-2xl mb-8 drop-shadow-md opacity-90">
+                            Trải nghiệm video giới thiệu hấp dẫn
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="carousel-item absolute inset-0 duration-700 ease-in-out opacity-0" data-carousel-item>
+                <img th:src="@{/images/banner2.webp}" alt="Slide 2"
+                     class="w-full h-full object-cover"
+                     onerror="this.src='https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1920&q=80'">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="carousel-item absolute inset-0 duration-700 ease-in-out opacity-0" data-carousel-item>
+                <img th:src="@{/images/banner3.jpeg}" alt="Slide 3"
+                     class="w-full h-full object-cover"
+                     onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80'">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
+            </div>
+
+            <!-- Slide 4 -->
+            <div class="carousel-item absolute inset-0 duration-700 ease-in-out opacity-0" data-carousel-item>
+                <img th:src="@{/images/home-banner-ip14.jpg}" alt="Slide 4"
+                     class="w-full h-full object-cover"
+                     onerror="this.src='https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1920&q=80'">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
+            </div>
+
+            <!-- Slide 5 -->
+            <div class="carousel-item absolute inset-0 duration-700 ease-in-out opacity-0" data-carousel-item>
+                <img th:src="@{/images/banner5.webp}" alt="Slide 5"
+                     class="w-full h-full object-cover"
+                     onerror="this.src='https://images.unsplash.com/photo-1497486751825-1233686d5d80?auto=format&fit=crop&w=1920&q=80'">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
+            </div>
+        </div>
+
+        <!-- Indicators -->
+        <div class="absolute z-30 flex space-x-3 bottom-5 left-1/2 transform -translate-x-1/2">
+            <button type="button" class="w-3 h-3 rounded-full bg-white opacity-100" data-carousel-slide-to="0"></button>
+            <button type="button" class="w-3 h-3 rounded-full bg-white opacity-50" data-carousel-slide-to="1"></button>
+            <button type="button" class="w-3 h-3 rounded-full bg-white opacity-50" data-carousel-slide-to="2"></button>
+            <button type="button" class="w-3 h-3 rounded-full bg-white opacity-50" data-carousel-slide-to="3"></button>
+            <button type="button" class="w-3 h-3 rounded-full bg-white opacity-50" data-carousel-slide-to="4"></button>
+        </div>
+
+        <!-- Controls -->
+        <button type="button" class="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group" data-carousel-prev aria-label="Previous slide">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30">
+                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 6 10">
+                    <path d="M5 1 1 5l4 4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                </svg>
+            </span>
+        </button>
+        <button type="button" class="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group" data-carousel-next aria-label="Next slide">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30">
+                <svg class="w-4 h-4 text-black" fill="none" viewBox="0 0 6 10">
+                    <path d="m1 9 4-4-4-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                </svg>
+            </span>
+        </button>
+    </div>
+</div>

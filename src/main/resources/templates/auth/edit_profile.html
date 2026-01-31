@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/Home_layout.html}" lang="vi">
+<head>
+    <title>Cập nhật thông tin cá nhân</title>
+</head>
+<body>
+<div layout:fragment="content" class="max-w-2xl mx-auto py-10">
+<form th:action="@{/profile/edit}" method="post" th:object="${user}"
+      class="bg-white p-8 rounded-xl shadow-xl space-y-6 max-w-2xl mx-auto">
+
+  <input type="hidden" th:field="*{userId}" />
+
+  <h2 class="text-3xl font-bold text-gray-800 mb-4">Cập nhật thông tin cá nhân</h2>
+
+  <!-- Username (read-only) -->
+  <div>
+    <label class="block text-sm font-medium text-gray-600 mb-1">Tên đăng nhập</label>
+    <input type="text" th:field="*{username}" readonly
+           class="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-700 border border-gray-300 cursor-not-allowed">
+  </div>
+
+  <!-- Email (read-only) -->
+  <div>
+    <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+    <input type="email" th:field="*{email}" readonly
+           class="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-700 border border-gray-300 cursor-not-allowed">
+  </div>
+
+  <!-- Full Name -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên</label>
+    <input type="text" th:field="*{fullName}"
+           class="w-full px-4 py-2 rounded-md bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none">
+  </div>
+
+  <!-- Phone -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+    <input type="text" th:field="*{phone}"
+           class="w-full px-4 py-2 rounded-md bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none">
+  </div>
+
+  <!-- Address -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+    <input type="text" th:field="*{address}"
+           class="w-full px-4 py-2 rounded-md bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none">
+  </div>
+
+  <!-- Avatar -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
+    <input type="text" th:field="*{avatar}"
+           class="w-full px-4 py-2 rounded-md bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none">
+  </div>
+
+  <!-- Submit -->
+  <div class="text-center pt-4">
+    <button type="submit"
+            class="bg-black hover:bg-gray-800 text-white font-semibold px-6 py-2 rounded-md transition">
+      💾 Lưu thay đổi
+    </button>
+  </div>
+</form>
+</div>
+</body>
+</html>

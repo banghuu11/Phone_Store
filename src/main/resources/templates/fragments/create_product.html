@@ -1,0 +1,112 @@
+<!-- fragments/create_product.html -->
+<div th:fragment="content">
+  <div class="p-6 bg-white rounded shadow">
+    <h2 class="text-2xl font-bold mb-4 text-blue-600" th:text="${isEdit} ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'">
+      Thêm sản phẩm mới
+    </h2>
+
+    <!-- Thông báo lỗi nếu có -->
+    <div th:if="${error}" class="mb-4 text-red-600 font-semibold" th:text="${error}"></div>
+
+    <!-- Form sản phẩm -->
+ <form
+  th:attr="hx-post=${isEdit} ? '/admin/fragment/products/edit/' + ${product.productId} : '/admin/fragment/products/create'"
+  hx-target="#section-content"
+  hx-swap="innerHTML"
+  th:object="${product}">
+
+
+      <!-- Tên sản phẩm -->
+      <div class="mb-4">
+        <label class="block mb-1">Tên sản phẩm:</label>
+        <input type="text" th:field="*{name}" required class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <!-- Thương hiệu -->
+      <div class="mb-4">
+        <label class="block mb-1">Thương hiệu:</label>
+        <input type="text" th:field="*{brand}" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <!-- Danh mục -->
+      <div class="mb-4">
+        <label class="block mb-1">Danh mục:</label>
+        <select th:field="*{category.categoryId}" class="w-full border px-3 py-2 rounded" required>
+          <option value="" disabled>-- Chọn danh mục --</option>
+          <option th:each="cat : ${categories}" th:value="${cat.categoryId}" th:text="${cat.name}"></option>
+        </select>
+      </div>
+
+      <!-- Giá -->
+      <div class="mb-4">
+        <label class="block mb-1">Giá:</label>
+        <input type="number" th:field="*{price}" step="0.01" required class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <!-- Giảm giá -->
+      <div class="mb-4">
+        <label class="block mb-1">Giảm giá (%):</label>
+        <input type="number" th:field="*{discount}" step="0.01" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <!-- Tồn kho -->
+      <div class="mb-4">
+        <label class="block mb-1">Tồn kho:</label>
+        <input type="number" th:field="*{stock}" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <!-- Mô tả -->
+      <div class="mb-4">
+        <label class="block mb-1">Mô tả:</label>
+        <textarea th:field="*{description}" rows="4" class="w-full border px-3 py-2 rounded"
+                  placeholder="Mô tả chi tiết sản phẩm"></textarea>
+      </div>
+
+      <!-- Ảnh URL -->
+      <div class="mb-4">
+        <label class="block mb-1">URL Ảnh:</label>
+        <input type="text" th:field="*{imageUrl}" class="w-full border px-3 py-2 rounded" />
+        <div th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}" class="mt-2">
+          <img th:src="@{${product.imageUrl}}" alt="Ảnh sản phẩm" class="w-24 h-24 object-cover border rounded" />
+        </div>
+      </div>
+
+      <!-- Trạng thái -->
+      <div class="mb-4">
+        <label class="block mb-1">Trạng thái:</label>
+        <select th:field="*{status}" class="w-full border px-3 py-2 rounded">
+          <option value="1">Hiển thị</option>
+          <option value="0">Ẩn</option>
+        </select>
+      </div>
+
+      <!-- Các nút thao tác -->
+      <div class="flex space-x-2 mt-6">
+        <!-- Nút Lưu -->
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          💾 <span th:text="${isEdit} ? 'Cập nhật' : 'Tạo mới'">Lưu</span>
+        </button>
+
+        <!-- Nút Quay lại -->
+        <button type="button"
+                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                hx-get="/admin/fragment/products"
+                hx-target="#section-content"
+                hx-swap="innerHTML">
+          🔙 Quay lại
+        </button>
+
+        <!-- Nút Xoá (chỉ khi chỉnh sửa) -->
+        <button type="button"
+                th:if="${isEdit}"
+                th:attr="hx-post=@{/admin/fragment/products/delete/{id}(id=${product.productId})}"
+                hx-confirm="Bạn có chắc chắn muốn xoá sản phẩm này không?"
+                hx-target="#section-content"
+                hx-swap="innerHTML"
+                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+          🗑️ Xoá
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

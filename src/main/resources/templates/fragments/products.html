@@ -1,0 +1,94 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+  <div class="max-w-7xl mx-auto px-4 py-10">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold text-blue-700">Quản lý sản phẩm</h1>
+
+      <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow transition-colors"
+              hx-get="/admin/fragment/products/create"
+              hx-target="#section-content"
+              hx-swap="innerHTML">
+        ➕ Thêm sản phẩm
+      </button>
+      <!-- Nút quản lý danh mục -->
+   
+    </div>
+
+    <!-- Thông báo -->
+    <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+      <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      <span th:text="${error}"></span>
+    </div>
+
+    <div class="overflow-x-auto border rounded-lg shadow bg-white">
+      <table class="min-w-full text-sm divide-y divide-gray-200">
+        <thead class="bg-blue-600 text-white">
+          <tr>
+            <th class="px-4 py-3 text-center">ID</th>
+            <th class="px-4 py-3 text-left">Tên sản phẩm</th>
+            <th class="px-4 py-3 text-center">Ảnh</th> <!-- ✅ Cột ảnh -->
+            <th class="px-4 py-3 text-center">Giá</th>
+            <th class="px-4 py-3 text-center">Tồn kho</th>
+            <th class="px-4 py-3 text-center">Thương hiệu</th>
+            <th class="px-4 py-3 text-center">Danh mục</th>
+            <th class="px-4 py-3 text-center">Trạng thái</th>
+            <th class="px-4 py-3 text-center">Hành động</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr th:each="product : ${products}" class="hover:bg-gray-50">
+            <td class="px-4 py-2 text-center font-semibold text-blue-700" th:text="${product.productId}"></td>
+            <td class="px-4 py-2" th:text="${product.name}"></td>
+
+            <!-- ✅ Cột hiển thị ảnh -->
+            <td class="px-4 py-2 text-center">
+              <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                   th:src="@{${product.imageUrl}}"
+                   alt="Ảnh"
+                   class="w-16 h-16 object-cover border rounded mx-auto" />
+              <span th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}" class="text-gray-400 italic">Không có</span>
+            </td>
+
+            <td class="px-4 py-2 text-center" 
+                th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')} + ' ₫'"></td>
+            <td class="px-4 py-2 text-center" th:text="${product.stock}"></td>
+            <td class="px-4 py-2 text-center" th:text="${product.brand} ?: 'Không rõ'"></td>
+            <td class="px-4 py-2 text-center" th:text="${product.category?.name} ?: 'Chưa rõ'"></td>
+            <td class="px-4 py-2 text-center">
+              <span th:if="${product.status == 1}" 
+                    class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-semibold">Hiển thị</span>
+              <span th:if="${product.status != 1}" 
+                    class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-semibold">Ẩn</span>
+            </td>
+            <td class="px-4 py-2">
+              <div class="flex justify-center gap-2">
+                <button type="button"
+                        class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-xs shadow transition"
+                        th:hx-get="@{/admin/fragment/products/edit/{id}(id=${product.productId})}"
+                        hx-target="#section-content"
+                        hx-swap="innerHTML">
+                  Sửa
+                </button>
+                <button type="button"
+                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs shadow transition"
+                        th:hx-post="@{/admin/fragment/products/delete/{id}(id=${product.productId})}"
+                        hx-target="#section-content"
+                        hx-swap="innerHTML"
+                        hx-confirm="Bạn có chắc chắn muốn xóa sản phẩm này không?">
+                  Xóa
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr th:if="${#lists.isEmpty(products)}">
+            <td colspan="9" class="text-center text-gray-400 py-8">Không có sản phẩm nào được tìm thấy.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

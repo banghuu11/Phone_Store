@@ -1,0 +1,66 @@
+<div th:fragment="content">
+    <h2 class="text-2xl font-bold mb-6 text-indigo-700 text-center">📋 Danh sách Phiếu giảm giá</h2>
+
+    <!-- Thông báo -->
+    <div th:if="${success}" class="bg-green-100 text-green-700 px-4 py-2 rounded mb-4" th:text="${success}"></div>
+    <div th:if="${error}" class="bg-red-100 text-red-700 px-4 py-2 rounded mb-4" th:text="${error}"></div>
+
+    <!-- Nút tạo mới -->
+    <div class="flex justify-end mb-4">
+        <a hx-get="/admin/coupons/create"
+           hx-target="#section-content"
+           hx-swap="innerHTML"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+            ➕ Tạo Phiếu Mới
+        </a>
+    </div>
+
+    <!-- Bảng danh sách -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow rounded border">
+            <thead class="bg-gray-100 text-gray-800">
+            <tr>
+                <th class="px-4 py-2 text-left">Mã</th>
+                <th class="px-4 py-2 text-left">Mô tả</th>
+                <th class="px-4 py-2 text-center">% Giảm</th>
+                <th class="px-4 py-2 text-right">Tối đa (₫)</th>
+                <th class="px-4 py-2 text-right">Tối thiểu (₫)</th>
+                <th class="px-4 py-2 text-center">Giới hạn</th>
+                <th class="px-4 py-2 text-center">Bắt đầu</th>
+                <th class="px-4 py-2 text-center">Kết thúc</th>
+                <th class="px-4 py-2 text-center">Trạng thái</th>
+                <th class="px-4 py-2 text-center">Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="coupon : ${coupons}" class="border-b hover:bg-gray-50">
+                <td class="px-4 py-2 font-medium" th:text="${coupon.code}"></td>
+                <td class="px-4 py-2" th:text="${coupon.description}"></td>
+                <td class="px-4 py-2 text-center" th:text="${coupon.discountPercent + '%'}"></td>
+                <td class="px-4 py-2 text-right" th:text="${#numbers.formatDecimal(coupon.maxDiscount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                <td class="px-4 py-2 text-right" th:text="${#numbers.formatDecimal(coupon.minOrderValue, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                <td class="px-4 py-2 text-center" th:text="${coupon.usageLimit}"></td>
+                <td class="px-4 py-2 text-center" th:text="${#temporals.format(coupon.startDate, 'dd/MM/yyyy')}"></td>
+                <td class="px-4 py-2 text-center" th:text="${#temporals.format(coupon.endDate, 'dd/MM/yyyy')}"></td>
+                <td class="px-4 py-2 text-center font-semibold"
+                    th:text="${coupon.status} ? '🟢 Hiệu lực' : '🔴 Tạm ngưng'"></td>
+                <td class="px-4 py-2 text-center space-x-2">
+                    <!-- Nút sửa -->
+                    <a th:attr="hx-get=@{/admin/coupons/edit/{id}(id=${coupon.couponId})}"
+                       hx-target="#section-content"
+                       hx-swap="innerHTML"
+                       href="#"
+                       class="text-blue-600 hover:underline">✏️</a>
+
+                    <!-- Nút xoá -->
+                    <form th:action="@{/admin/coupons/delete/{id}(id=${coupon.couponId})}" method="post"
+                          class="inline-block"
+                          onsubmit="return confirm('Bạn chắc chắn muốn xoá phiếu này?')">
+                        <button type="submit" class="text-red-600 hover:underline">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

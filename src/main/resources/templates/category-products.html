@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${currentCategory.name + ' - ShopTech'}">Danh mục - ShopTech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+<!-- Header -->
+<div th:replace="fragmentsHome/header :: header"></div>
+
+<main class="container mx-auto px-4 py-10">
+    <!-- Breadcrumb -->
+    <nav class="mb-6 text-sm text-gray-600 flex flex-wrap items-center gap-2">
+        <a href="/" class="hover:text-black">Trang chủ</a>
+        <span>/</span>
+        <span th:if="${currentCategory.parent != null}">
+            <a th:href="@{'/category/parent/' + ${currentCategory.parent.categoryId}}" th:text="${currentCategory.parent.name}" class="hover:text-black"></a>
+            <span>/</span>
+        </span>
+        <span th:text="${currentCategory.name}" class="font-medium text-black"></span>
+    </nav>
+
+    <!-- Tiêu đề danh mục -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2" th:text="${currentCategory.name}"></h1>
+        <p class="text-gray-600" th:text="${currentCategory.description}"></p>
+    </div>
+
+    <!-- Bộ lọc -->
+    <div class="flex items-center justify-between mb-6">
+        <p class="text-gray-500 text-sm" th:text="${products.size() + ' sản phẩm'}"></p>
+        <select class="border px-3 py-2 rounded text-sm focus:ring-2 focus:ring-black">
+            <option>Sắp xếp theo</option>
+            <option>Giá tăng dần</option>
+            <option>Giá giảm dần</option>
+            <option>Tên A-Z</option>
+            <option>Tên Z-A</option>
+        </select>
+    </div>
+
+    <!-- Nếu không có sản phẩm -->
+    <div th:if="${#lists.isEmpty(products)}" class="text-center py-24">
+        <div class="text-5xl mb-4">📦</div>
+        <h2 class="text-xl font-semibold mb-2">Không có sản phẩm</h2>
+        <p class="text-gray-500 mb-6">Hiện chưa có sản phẩm nào trong danh mục này.</p>
+        <a href="/" class="inline-block bg-black text-white px-6 py-3 rounded hover:bg-gray-800">Quay về trang chủ</a>
+    </div>
+
+    <!-- Danh mục con -->
+    <section th:if="${currentCategory.parent == null && !#lists.isEmpty(currentCategory.children)}" class="mb-10">
+        <h2 class="text-2xl font-bold mb-6">Danh mục con</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <a th:each="child : ${currentCategory.children}" th:href="@{'/category/' + ${child.categoryId}}" class="p-5 bg-white border rounded-lg text-center hover:shadow transition">
+                <h3 class="font-semibold text-gray-800" th:text="${child.name}"></h3>
+                <p class="text-sm text-gray-500 mt-1" th:text="${child.description}"></p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Danh sách sản phẩm -->
+    <section th:if="${!#lists.isEmpty(products)}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div th:each="product : ${products}" class="bg-white border rounded-lg hover:shadow-md transition">
+            <a th:href="@{'/detail/product/' + ${product.productId}}">
+                <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/default-product.jpg'}"
+                     th:alt="${product.name}"
+                     class="w-full max-h-48 object-contain rounded-t-lg" />
+            </a>
+            <div class="p-4">
+                <h3 class="text-base font-semibold mb-1">
+                    <a th:href="@{'/detail/product/' + ${product.productId}}" th:text="${product.name}" class="hover:text-blue-600"></a>
+                </h3>
+                <p class="text-sm text-gray-500 h-12 line-clamp-2 mb-2" th:text="${product.description}"></p>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-lg font-bold text-black" th:text="${'₫' + #numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')}"></span>
+                    <span th:if="${product.discount > 0}" class="text-xs bg-red-500 text-white px-2 py-0.5 rounded">
+                        -<span th:text="${#numbers.formatDecimal(product.discount, 0, 'COMMA', 0, 'POINT')}">0</span>%
+                    </span>
+                </div>
+                <button th:onclick="'addToCart(' + ${product.productId} + ')'"
+                        class="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition">🛒 Thêm vào giỏ hàng</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<div th:replace="fragmentsHome/footer :: footer"></div>
+
+<!-- Add to Cart script -->
+<script>
+    function addToCart(productId) {
+        $.post('/cart/add/' + productId, { quantity: 1 })
+            .done(response => {
+                if (response === 'success') {
+                    alert('Đã thêm vào giỏ hàng!');
+                } else {
+                    alert('Lỗi khi thêm vào giỏ hàng.');
+                }
+            })
+            .fail(() => alert('Lỗi khi thêm vào giỏ hàng.'));
+    }
+</script>
+</body>
+</html>

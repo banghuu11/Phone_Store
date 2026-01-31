@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <title>Danh sách yêu thích</title>
+    <link rel="stylesheet" th:href="@{/output.css}"/>
+</head>
+<body>
+<div class="container mx-auto px-4 py-10">
+    <h1 class="text-2xl font-bold text-pink-700 mb-6 flex items-center gap-2">
+        <span>❤️</span> Danh sách sản phẩm yêu thích
+    </h1>
+    <div th:if="${#lists.isEmpty(wishlistProducts)}" class="text-gray-500 italic">Bạn chưa có sản phẩm yêu thích nào.</div>
+    <div th:if="${!#lists.isEmpty(wishlistProducts)}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div th:each="product : ${wishlistProducts}" class="border border-pink-300 rounded-lg p-3 group hover:shadow-lg transition bg-white">
+            <a th:href="@{'/detail/product/' + ${product.productId}}">
+                <div class="w-full h-36 bg-gray-100 flex items-center justify-center rounded mb-3 overflow-hidden">
+                    <img th:src="${product.imageUrl != null && !#strings.isEmpty(product.imageUrl) ? product.imageUrl : '/images/default-product.jpg'}"
+                         th:alt="${product.name}" class="object-contain h-full group-hover:scale-105 transition duration-300"/>
+                </div>
+                <div class="text-black font-semibold mb-1 group-hover:text-gray-800" th:text="${product.name}">Product</div>
+                <div class="text-black font-bold" th:text="${'₫' + #numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')}">₫0</div>
+            </a>
+            <button th:onclick="'addToCart(' + ${product.productId} + ')'" class="mt-2 w-full bg-black text-white py-1 rounded hover:bg-gray-800 transition">
+                🛒 Thêm vào giỏ
+            </button>
+            <form th:action="@{'/wishlist/remove'}" method="post" class="mt-2">
+                <input type="hidden" name="productId" th:value="${product.productId}"/>
+                <button type="submit" class="w-full bg-red-100 text-red-600 py-1 rounded hover:bg-red-200 transition flex items-center justify-center gap-2">
+                    <span>🗑️</span> Xóa khỏi yêu thích
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="mt-8">
+        <a href="/" class="text-blue-600 hover:underline">&larr; Quay lại trang chủ</a>
+    </div>
+</div>
+</body>
+</html> 

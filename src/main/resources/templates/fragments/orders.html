@@ -1,0 +1,75 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <div class="max-w-7xl mx-auto px-4 py-10">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold text-blue-700">Quản lý đơn hàng</h1>
+      <button hx-get="/admin/fragment/orders/create" hx-target="#section-content" hx-swap="innerHTML"
+              class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+        ➕ Thêm mới
+      </button>
+    </div>
+
+    <!-- Thông báo -->
+    <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+      <span th:text="${success}"></span>
+    </div>
+
+    <div class="overflow-x-auto border rounded-lg shadow bg-white">
+      <table class="min-w-full text-sm divide-y divide-gray-200">
+        <thead class="bg-blue-600 text-white">
+          <tr>
+            <th class="px-4 py-3 text-center">ID</th>
+            <th class="px-4 py-3 text-center">Khách hàng</th>
+            <th class="px-4 py-3 text-center">Địa chỉ</th>
+            <th class="px-4 py-3 text-center">Tổng tiền</th>
+            <th class="px-4 py-3 text-center">Trạng thái</th>
+            <th class="px-4 py-3 text-center">Hành động</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr th:each="order : ${orders}" class="hover:bg-gray-50">
+            <td class="px-4 py-2 text-center font-semibold text-blue-700" th:text="${order.orderId}"></td>
+            <td class="px-4 py-2 text-center" th:text="${order.user != null ? order.user.fullName : 'Khách'}"></td>
+            <td class="px-4 py-2 text-center" th:text="${order.shippingAddress}"></td>
+            <td class="px-4 py-2 text-center" th:text="${#numbers.formatDecimal(order.totalAmount,0,'COMMA',0,'POINT')} + ' ₫'"></td>
+            <td class="px-4 py-2 text-center">
+              <form hx-post="/admin/fragment/orders/updateStatus" hx-trigger="change" hx-target="#section-content" hx-swap="innerHTML">
+                <input type="hidden" name="orderId" th:value="${order.orderId}" />
+                <select name="status" class="border border-gray-300 rounded px-2 py-1">
+                  <option value="PENDING" th:selected="${order.status=='PENDING'}">Đang chờ xử lý</option>
+                  <option value="CONFIRMED" th:selected="${order.status=='CONFIRMED'}">Đã xác nhận</option>
+                  <option value="SHIPPED" th:selected="${order.status=='SHIPPED'}">Đã giao hàng</option>
+                  <option value="COMPLETED" th:selected="${order.status=='COMPLETED'}">Hoàn thành</option>
+                  <option value="CANCELLED" th:selected="${order.status=='CANCELLED'}">Đã hủy</option>
+                </select>
+              </form>
+            </td>
+            <td class="px-4 py-2 text-center space-x-1">
+              <button th:if="${order.status == 'PENDING'}"
+                      th:hx-post="@{/admin/fragment/orders/confirm/{id}(id=${order.orderId})}"
+                      hx-target="#section-content"
+                      hx-swap="innerHTML"
+                      class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">
+                ✔
+              </button>
+              <button th:hx-get="@{/admin/fragment/orders/edit/{id}(id=${order.orderId})}"
+                      hx-target="#section-content" hx-swap="innerHTML"
+                      class="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600">
+                ✎
+              </button>
+              <button th:hx-post="@{/admin/fragment/orders/delete/{id}(id=${order.orderId})}"
+                      hx-target="#section-content" hx-swap="innerHTML"
+                      hx-confirm="Bạn có chắc muốn xoá đơn hàng này?"
+                      class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">
+                🗑
+              </button>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(orders)}">
+            <td colspan="6" class="text-center text-gray-400 py-8">Chưa có đơn hàng nào.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

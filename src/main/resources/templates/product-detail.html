@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/Home_layout.html}" lang="vi">
+
+<head>
+    <title th:text="${product.name} + ' - ShopTech'">Chi tiết sản phẩm</title>
+    <style>
+        body {
+            background: #fff;
+            color: #111;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 6px 36px 0 rgba(0,0,0,.10);
+        }
+        .product-shadow {
+            box-shadow: 0 2px 16px 0 rgba(0,0,0,.10);
+        }
+        /* Black & white buttons */
+        .btn-black {
+            background: #111;
+            color: #fff;
+            transition: background .2s;
+        }
+        .btn-black:hover {
+            background: #333;
+        }
+        .btn-white {
+            background: #fff;
+            color: #111;
+            border: 2px solid #111;
+            transition: background .2s, color .2s;
+        }
+        .btn-white:hover {
+            background: #111;
+            color: #fff;
+        }
+        /* Other accents */
+        .product-price {
+            color: #111;
+            font-size: 2.5rem;
+        }
+        .discount-pill {
+            background: #111;
+            color: #fff;
+        }
+        .breadcrumb a {
+            color: #111;
+            transition: color .2s;
+        }
+        .breadcrumb a:hover {
+            color: #222;
+            text-decoration: underline;
+        }
+        .comment-box {
+            background: #f9f9f9;
+        }
+        .comment-username {
+            color: #111;
+        }
+        .comment-date {
+            color: #888;
+        }
+        .comment-admin {
+            background: #fff;
+            border-left: 4px solid #111;
+        }
+        .related-card {
+            background: #fff;
+            border: 1px solid #eee;
+            box-shadow: 0 1px 8px 0 rgba(0,0,0,.06);
+            transition: box-shadow .2s;
+        }
+        .related-card:hover {
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,.12);
+        }
+        /* Hide default blue focus ring, use black */
+        input:focus, textarea:focus, select:focus, button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #111;
+        }
+        /* Gallery thumbnails */
+        .thumbnail-img {
+            border: 2px solid #eee;
+            transition: border .2s, box-shadow .2s;
+        }
+        .thumbnail-img:hover {
+            border: 2px solid #111;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,.10);
+        }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Breadcrumb -->
+        <nav class="mb-8 breadcrumb" th:if="${product != null}">
+            <ol class="flex items-center space-x-2 text-sm text-gray-600">
+                <li><a href="/" class="">Trang chủ</a></li>
+                <li><span class="mx-2">/</span></li>
+                <li th:if="${product.category?.parent != null}">
+                    <a th:href="@{'/category/parent/' + ${product.category.parent.categoryId}}"
+                       th:text="${product.category.parent.name}"></a>
+                </li>
+                <li th:if="${product.category?.parent != null}"><span class="mx-2">/</span></li>
+                <li th:if="${product.category != null}">
+                    <a th:href="@{'/category/' + ${product.category.categoryId}}"
+                       th:text="${product.category.name}"></a>
+                </li>
+                <li><span class="mx-2">/</span></li>
+                <li class="text-black font-medium" th:text="${product.name}"></li>
+            </ol>
+        </nav>
+
+        <!-- Chi tiết sản phẩm -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16" th:if="${product != null}">
+            <div>
+                <!-- Hình ảnh sản phẩm -->
+                <div class="relative w-full max-w-md mx-auto mb-4 product-shadow">
+                    <img id="mainImage"
+                         th:src="${product.imageUrl != null ? product.imageUrl : (images != null && !#lists.isEmpty(images) ? images[0].url : '/images/default-product.jpg')}"
+                         th:alt="${product.name}"
+                         class="w-full object-contain rounded-lg" />
+                </div>
+                <!-- Thumbnails nếu có ảnh phụ -->
+                <div th:if="${images != null && !#lists.isEmpty(images)}" class="flex gap-2 overflow-x-auto">
+                    <img th:each="img : ${images}"
+                         th:src="@{${img.url}}"
+                         th:alt="${img.caption} ?: ${product.name}"
+                         class="thumbnail-img w-20 h-20 object-cover rounded cursor-pointer"
+                         onclick="thumbnailClick(this)" />
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <h1 class="text-3xl font-bold" th:text="${product.name}"></h1>
+                <p class="text-base" th:text="${product.description}"></p>
+
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-4">
+                        <span class="product-price font-bold"
+                              th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span>
+                        <span th:if="${product.discount != null && product.discount > 0}"
+                              class="discount-pill text-sm px-2 py-1 rounded">
+                            -<span th:text="${#numbers.formatDecimal(product.discount, 0, 'COMMA', 0, 'POINT')}"></span>%
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Nhập mã giảm giá -->
+                <div class="mt-4">
+                    <label for="voucher" class="block text-sm font-medium mb-1">Nhập mã giảm giá (nếu có):</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="voucher" name="voucher"
+                               placeholder="Mã voucher"
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded" />
+                        <button onclick="applyVoucher()"
+                                class="btn-white px-4 py-2 rounded transition font-semibold">
+                            Áp dụng
+                        </button>
+                    </div>
+                </div>
+
+                <button th:onclick="'addToCart(' + ${product.productId} + ')'"
+                        class="btn-black w-full py-3 px-4 rounded-lg transition font-medium mt-4">
+                    🛒 Thêm vào giỏ hàng
+                </button>
+                <button th:onclick="'buynow(' + ${product.productId} + ')'"
+                        class="btn-white w-full mt-2 py-3 px-4 rounded-lg transition font-medium border-2">
+                    ⚡ Mua ngay
+                </button>
+            </div>
+        </div>
+
+        <!-- Sản phẩm liên quan -->
+        <div th:if="${relatedProducts != null && !#lists.isEmpty(relatedProducts)}">
+            <h2 class="text-2xl font-bold mb-6">Sản phẩm liên quan</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div th:each="rp : ${relatedProducts}" class="related-card rounded-lg overflow-hidden">
+                    <a th:href="@{'/detail/product/' + ${rp.productId}}" class="block">
+                        <div class="w-full aspect-square overflow-hidden">
+                            <img th:src="${rp.imageUrl != null ? rp.imageUrl : '/images/default-product.jpg'}"
+                                 th:alt="${rp.name}"
+                                 class="w-full h-full object-cover transition-transform duration-300" />
+                        </div>
+                        <div class="p-3">
+                            <h3 class="text-base font-semibold truncate" th:text="${rp.name}"></h3>
+                            <p class="font-bold text-sm mt-1"
+                               th:text="${#numbers.formatDecimal(rp.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gửi bình luận -->
+        <div class="mt-16">
+            <div class="comment-box rounded-lg shadow p-6 mb-8">
+                <h3 class="text-xl font-bold mb-4">Viết bình luận</h3>
+                <form th:action="@{'/detail/product/' + ${product.productId} + '/comment'}" method="post" class="space-y-4">
+                    <input type="hidden" name="username" th:value="${#authentication?.name ?: 'Ẩn danh'}" />
+                    <textarea name="content" rows="4" required placeholder="Viết bình luận..."
+                              class="w-full border border-gray-300 rounded px-4 py-2"></textarea>
+                    <button type="submit"
+                            class="btn-black px-6 py-2 rounded transition font-medium">
+                        Gửi bình luận
+                    </button>
+                </form>
+                <div th:if="${success}" class="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                    <span th:text="${success}"></span>
+                </div>
+            </div>
+
+            <!-- Danh sách bình luận -->
+            <div th:if="${comments != null && !#lists.isEmpty(comments)}">
+                <h3 class="text-xl font-bold mb-4">Bình luận</h3>
+                <div class="space-y-6">
+                    <div th:each="comment : ${comments}" class="bg-gray-50 p-4 rounded-lg border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="comment-username font-semibold" th:text="${comment.username}"></span>
+                            <span class="comment-date text-sm"
+                                  th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        </div>
+                        <p class="text-gray-800" th:text="${comment.content}"></p>
+                        <div th:if="${comment.adminReply != null}" class="comment-admin mt-2 pl-4">
+                            <p class="text-sm font-medium">Phản hồi từ quản trị viên:</p>
+                            <p class="text-gray-700" th:text="${comment.adminReply}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function addToCart(id) {
+            fetch('/cart/add/' + id, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: new URLSearchParams({quantity: 1})
+            }).then(r => r.text()).then(msg => alert(msg === 'success' ? 'Đã thêm vào giỏ hàng' : 'Lỗi, thử lại!'));
+        }
+        function buynow(id) {
+            fetch('/cart/add/' + id, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: new URLSearchParams({quantity: 0})
+            })
+                .then(r => r.text())
+                .then(msg => alert(msg === 'success' ? 'Đã thêm vào giỏ hàng!' : 'Lỗi, thử lại!'));
+        }
+
+        function applyVoucher() {
+            const code = document.getElementById('voucher').value.trim();
+            if (!code) {
+                alert('Vui lòng nhập mã voucher!');
+                return;
+            }
+            alert('Đã áp dụng mã: ' + code);
+        }
+
+        // ==== Gallery navigation ====
+        let imageUrls = [];
+        /*[# th:each="img : ${images}"]*/
+        imageUrls.push('[[${img.url}]]');
+        /*[/]*/
+
+        if (imageUrls.length === 0) {
+            imageUrls.push('[[${product.imageUrl != null ? product.imageUrl : "/images/default-product.jpg"}]]');
+        }
+
+        let currentIndex = 0;
+
+        function showImage(idx) {
+            const mainImg = document.getElementById('mainImage');
+            if (mainImg) {
+                mainImg.src = imageUrls[idx];
+            }
+        }
+
+        // Đổi ảnh: swap src giữa mainImage và thumbnail
+        function thumbnailClick(el) {
+            const mainImg = document.getElementById('mainImage');
+            if (!mainImg) return;
+            const tempSrc = mainImg.src;
+            const tempAlt = mainImg.alt;
+            mainImg.src = el.src;
+            mainImg.alt = el.alt;
+            el.src = tempSrc;
+            el.alt = tempAlt;
+        }
+        /*]]>*/
+    </script>
+</div>
+</body>
+</html>

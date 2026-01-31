@@ -1,0 +1,186 @@
+<!-- src/main/resources/templates/fragmentsHome/header.html -->
+<div th:fragment="header">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex items-center justify-between px-4 py-3 md:px-8">
+            <!-- Logo -->
+            <a href="/" class="text-2xl font-bold text-black">ShopTech</a>
+            <button id="changeColorBtn">o</button>
+            <script>
+                document.getElementById('changeColorBtn').addEventListener('click', function() {
+                    document.body.sections.style.backgroundColor = 'black';
+                });
+
+                </script>
+            <!-- Danh mục -->
+            <div class="relative group hidden md:block">
+                <button class="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100 text-gray-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>Danh mục</span>
+                </button>
+                <div class="absolute top-full left-0 mt-2 bg-white border rounded shadow-lg z-50 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all">
+                    <ul>
+                        <li th:each="category : ${categories}" class="relative group/item">
+                            <a th:href="@{'/category/parent/' + ${category.categoryId}}" class="flex justify-between px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                                <span th:text="${category.name}"></span>
+                                <svg th:if="${category.children != null && !#lists.isEmpty(category.children)}" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </a>
+                            <!-- Danh mục con -->
+                            <div th:if="${category.children != null && !#lists.isEmpty(category.children)}"
+                                 class="absolute top-0 left-full ml-1 min-w-[180px] bg-white border rounded shadow-lg invisible opacity-0 group-hover/item:visible group-hover/item:opacity-100 transition-all">
+                                <ul>
+                                    <li th:each="child : ${category.children}">
+                                        <a th:href="@{'/category/' + ${child.categoryId}}" class="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700" th:text="${child.name}"></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tìm kiếm (ẩn trên mobile) -->
+            <form th:action="@{/search}" method="get" class="hidden md:flex flex-1 mx-4">
+                <div class="relative w-full max-w-md">
+                    <input type="text" name="q" id="search-input" placeholder="Tìm sản phẩm..."
+                           autocomplete="off"
+                           class="w-full border border-gray-300 px-4 py-2 rounded-full text-sm focus:ring-black focus:outline-none"
+                           th:value="${searchQuery != null ? searchQuery : ''}" />
+                    <!-- Suggestions -->
+                    <div id="suggestions" class="absolute left-0 right-0 mt-1 bg-white border rounded shadow-lg hidden max-h-60 overflow-y-auto z-50"></div>
+                    <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor">
+                            <path d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Bên phải -->
+            <div class="flex items-center gap-3">
+                <!-- Giỏ hàng -->
+                <a href="/cart" class="relative text-gray-700 hover:text-black">
+                    🛒 giỏ hàng
+                    <span id="cart-count" th:text="${cartItemCount}" th:classappend="${cartItemCount == 0}? ' hidden' : ''" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center"></span>
+                </a>
+
+                <!-- Tài khoản -->
+                <div class="relative group" th:if="${currentUser == null}">
+                    <button class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Tài khoản</button>
+                    <div class="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all">
+                        <a href="/Home/login" class="block px-4 py-2 hover:bg-gray-100 text-sm">Đăng nhập</a>
+                        <a href="/Home/register" class="block px-4 py-2 hover:bg-gray-100 text-sm">Đăng ký</a>
+                    </div>
+                </div>
+                <div class="relative group" th:if="${currentUser != null}">
+                    <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded text-gray-700">
+                        <img th:src="@{${currentUser.avatar != null && !#strings.isEmpty(currentUser.avatar) ? currentUser.avatar : '/images/default-avatar.png'}}"
+                             class="w-6 h-6 rounded-full object-cover" alt="avatar" />
+                        <span th:text="${currentUser.fullName != null ? currentUser.fullName : currentUser.username}"></span>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all">
+                        <a href="/profile" class="block px-4 py-2 hover:bg-gray-100 text-sm">Trang cá nhân</a>
+                        <a href="/logout" class="block px-4 py-2 hover:bg-gray-100 text-sm">Đăng xuất</a>
+                    </div>
+                </div>
+
+                <!-- Hamburger -->
+                <button id="mobile-menu-btn" class="md:hidden text-2xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor">
+                        <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-200">
+            <nav class="flex flex-col p-4 space-y-2">
+                <div th:each="category : ${categories}">
+                    <a th:href="@{'/category/parent/' + ${category.categoryId}}" class="font-medium text-gray-700 hover:text-black hover:bg-gray-100 px-4 py-2 rounded" th:text="${category.name}"></a>
+                    <div th:if="${category.children != null && !#lists.isEmpty(category.children)}" class="pl-4">
+                        <ul>
+                            <li th:each="child : ${category.children}">
+                                <a th:href="@{'/category/' + ${child.categoryId}}" class="block px-4 py-1 text-sm text-gray-600 hover:bg-gray-100 hover:text-black" th:text="${child.name}"></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Form tìm kiếm -->
+            <form th:action="@{/search}" method="get" class="p-4">
+                <div class="relative">
+                    <input type="text" name="q" placeholder="Tìm kiếm..."
+                           class="w-full border border-gray-300 px-4 py-2 rounded-full text-sm focus:ring-black focus:outline-none"
+                           th:value="${searchQuery != null ? searchQuery : ''}" />
+                    <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor">
+                            <path d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </header>
+
+    <!-- Script toggle menu -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const btn = document.getElementById("mobile-menu-btn");
+            const menu = document.getElementById("mobile-menu");
+            btn.addEventListener("click", () => menu.classList.toggle("hidden"));
+        });
+
+        // Autocomplete search
+        document.addEventListener("DOMContentLoaded", () => {
+            const input = document.getElementById("search-input");
+            const box = document.getElementById("suggestions");
+
+            let controller;
+
+            const debounce = (fn, delay) => {
+                let t;
+                return (...args) => {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn(...args), delay);
+                };
+            };
+
+            const fetchSuggest = debounce(query => {
+                if (controller) controller.abort();
+                if (!query || query.length < 2) {
+                    box.classList.add("hidden");
+                    return;
+                }
+                controller = new AbortController();
+                fetch(`/api/products/suggest?q=${encodeURIComponent(query)}`, {signal: controller.signal})
+                    .then(r => r.json())
+                    .then(list => {
+                        if (!list.length) {
+                            box.classList.add("hidden");
+                            return;
+                        }
+                        box.innerHTML = list.map(item => `<div data-id="${item.id}" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">${item.name}</div>`).join("");
+                        box.classList.remove("hidden");
+                    }).catch(()=>{});
+            }, 300);
+
+            input.addEventListener("input", e => fetchSuggest(e.target.value));
+
+            box.addEventListener("click", e => {
+                const target = e.target.closest("[data-id]");
+                if (!target) return;
+                const id = target.dataset.id;
+                window.location.href = `/detail/product/${id}`;
+            });
+
+            document.addEventListener("click", e => {
+                if (!box.contains(e.target) && e.target !== input) {
+                    box.classList.add("hidden");
+                }
+            });
+        });
+    </script>
+</div>

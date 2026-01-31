@@ -1,0 +1,51 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+    <div class="w-full max-w-xl mx-auto px-4 py-10">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center"
+            th:text="${category.categoryId != null ? 'Chỉnh sửa danh mục' : 'Thêm danh mục'}">
+            Thêm danh mục
+        </h2>
+
+        <form th:object="${category}"
+              method="post"
+              th:hx-post="${category.categoryId != null ? '/admin/categories/edit/' + category.categoryId : '/admin/categories/create'}"
+              hx-target="#section-content"
+              hx-swap="innerHTML"
+              class="bg-white p-6 rounded shadow">
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Tên danh mục *</label>
+                <input type="text" th:field="*{name}" class="border px-3 py-2 rounded w-full" required/>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Mô tả</label>
+                <textarea th:field="*{description}" rows="2" class="border px-3 py-2 rounded w-full"></textarea>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-1">Danh mục cha (nếu có)</label>
+                <select th:field="*{parent}" class="border px-3 py-2 rounded w-full">
+                    <option value="">-- Không chọn --</option>
+                    <option th:each="parent : ${categories}"
+                            th:value="${parent.categoryId}"
+                            th:text="${parent.name}"
+                            th:selected="${category.parent?.categoryId == parent.categoryId}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="flex justify-between">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded">
+                    <span th:text="${category.categoryId != null ? 'Cập nhật' : 'Tạo mới'}">Lưu</span>
+                </button>
+                <button type="button"
+                        hx-get="/admin/categories"
+                        hx-target="#section-content"
+                        hx-swap="innerHTML"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded">
+                    Quay lại
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

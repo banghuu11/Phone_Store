@@ -1,0 +1,48 @@
+<!-- fragments/feedbacks.html -->
+<div th:fragment="content">
+    <div class="p-6">
+        <h1 class="text-2xl font-bold mb-4">Phản hồi khách hàng</h1>
+
+        <!-- Thông báo thành công -->
+        <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <span th:text="${success}"></span>
+        </div>
+
+        <div class="overflow-x-auto border rounded-lg shadow bg-white">
+            <table class="min-w-full text-sm divide-y divide-gray-200">
+                <thead class="bg-blue-600 text-white">
+                    <tr>
+                        <th class="px-4 py-3">ID</th>
+                        <th class="px-4 py-3">Tên</th>
+                        <th class="px-4 py-3">Email</th>
+                        <th class="px-4 py-3">Chủ đề</th>
+                        <th class="px-4 py-3">Nội dung</th>
+                        <th class="px-4 py-3">Ngày tạo</th>
+                        <th class="px-4 py-3">Phản hồi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <tr th:each="f : ${feedbacks}" class="hover:bg-gray-50">
+                        <td class="px-4 py-2" th:text="${f.feedbackId}"></td>
+                        <td class="px-4 py-2" th:text="${f.name}"></td>
+                        <td class="px-4 py-2" th:text="${f.email}"></td>
+                        <td class="px-4 py-2" th:text="${f.subject}"></td>
+                        <td class="px-4 py-2 max-w-xs truncate" th:text="${f.message}"></td>
+                        <td class="px-4 py-2" th:text="${#dates.format(f.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td class="px-4 py-2">
+                            <!-- Nếu chưa phản hồi -->
+                            <div th:if="${f.adminReply == null}">
+                                <form th:action="@{'/admin/fragment/feedbacks/reply/' + ${f.feedbackId}}" method="post" class="flex gap-2">
+                                    <input type="text" name="reply" placeholder="Phản hồi..." class="border px-2 py-1 rounded w-full" required>
+                                    <button class="bg-green-600 text-white px-3 rounded">Gửi</button>
+                                </form>
+                            </div>
+                            <!-- Đã phản hồi -->
+                            <div th:if="${f.adminReply != null}" class="text-sm text-gray-700" th:text="${f.adminReply}"></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div> 
